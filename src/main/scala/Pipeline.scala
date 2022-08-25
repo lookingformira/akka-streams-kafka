@@ -22,8 +22,10 @@ object Pipeline extends App {
   val sourceKafka = Consumer
     .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test"))
 
-  sourceKafka
-    .map{element => element.value().toUpperCase}
+  sourceKafka.async  // 1 core
+    .map{element => element.value().toUpperCase}.async // 1 core
     .map(value => new ProducerRecord[String, String]("akka-stream-test", value))
     .runWith(Producer.plainSink(producerSettings))
 }
+
+// topic with 50 part => 50 akka stream app
