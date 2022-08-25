@@ -18,7 +18,8 @@ object First extends App {
   val graph1: RunnableGraph[NotUsed] = source.to(sink)
   val graph2: RunnableGraph[NotUsed] = source.via(flow).to(sink)
 
-  //  graph2.run()
+
+//  graph2.run()
 
   /**
    * Next Example
@@ -49,13 +50,12 @@ object First extends App {
     x * 10
   }
 
-  simpleSource.async
+  simpleSource
     .via(hardFlow3).async
     .via(hardFlow4).async
     .via(hardFlow4).async
-    .via(hardFlow4).async
     .to(simpleSink).async
-  //    .run()
+  .run()
 
 
 

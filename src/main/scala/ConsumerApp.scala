@@ -1,3 +1,4 @@
+import akka.Done
 import akka.actor.ActorSystem
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.kafka.scaladsl.Consumer
@@ -6,7 +7,7 @@ import akka.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
 import org.apache.kafka.common.serialization.StringDeserializer
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
 
 
@@ -19,7 +20,7 @@ object ConsumerApp extends App {
   val consumerConfig = config.getConfig("akka.kafka.consumer")
   val consumerSettings = ConsumerSettings(consumerConfig, new StringDeserializer, new StringDeserializer)
 
-  val consume = Consumer
+  val consume: Future[Done] = Consumer
     .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test"))
     .runWith(Sink.foreach(println))
 
