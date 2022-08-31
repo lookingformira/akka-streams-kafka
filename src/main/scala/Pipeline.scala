@@ -20,11 +20,11 @@ object Pipeline extends App {
   val producerSettings = ProducerSettings(producerConfig, new StringSerializer, new StringSerializer)
 
   val sourceKafka = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test"))
+    .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test-in"))
 
   sourceKafka.async  // 1 core
     .map{element => element.value().toUpperCase}.async // 1 core
-    .map(value => new ProducerRecord[String, String]("akka-stream-test", value))
+    .map(value => new ProducerRecord[String, String]("akka-stream-test-out", value))
     .runWith(Producer.plainSink(producerSettings))
 }
 

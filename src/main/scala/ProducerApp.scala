@@ -22,7 +22,7 @@ object ProducerApp extends App {
 
   val produce: Future[Done] =
     Source(1 to 100)
-      .map(value => new ProducerRecord[String, String]("akka-stream-test", value.toString))
+      .map(value => new ProducerRecord[String, String]("akka-stream-test-in", value.toString))
       .runWith(Producer.plainSink(producerSettings))
 
   produce onComplete  {

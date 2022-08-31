@@ -21,7 +21,7 @@ object ConsumerApp extends App {
   val consumerSettings = ConsumerSettings(consumerConfig, new StringDeserializer, new StringDeserializer)
 
   val consume: Future[Done] = Consumer
-    .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test"))
+    .plainSource(consumerSettings, Subscriptions.topics("akka-stream-test-out"))
     .runWith(Sink.foreach(println))
 
   consume onComplete  {

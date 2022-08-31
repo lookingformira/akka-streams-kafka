@@ -51,19 +51,19 @@ object First extends App {
   }
 
   simpleSource
-    .via(hardFlow3).async
-    .via(hardFlow4).async
-    .via(hardFlow4).async
-    .to(simpleSink).async
-  .run()
+    .via(hardFlow3)
+    .via(hardFlow4)
+    .via(hardFlow4)
+    .to(simpleSink)
+//  .run()
 
 
 
-  Source(1 to 3)
-    .map(element => { println(s"Flow A: $element"); element })
-    .map(element => { println(s"Flow B: $element"); element })
+  Source(1 to 3).async
+    .map(element => { println(s"Flow A: $element"); element }).async
+    .map(element => { println(s"Flow B: $element"); element }).async
     .map(element => { println(s"Flow C: $element"); element })
-    .runWith(Sink.ignore)
+  .runWith(Sink.ignore)
 
 
 }

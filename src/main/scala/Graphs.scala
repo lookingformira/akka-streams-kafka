@@ -1,7 +1,7 @@
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, ClosedShape, SinkShape, SourceShape, UniformFanOutShape}
+import akka.stream.{ActorMaterializer, ClosedShape, FanInShape2, SinkShape, SourceShape, UniformFanInShape, UniformFanOutShape}
 import akka.stream.scaladsl.{Balance, Broadcast, Concat, Flow, GraphDSL, Merge, RunnableGraph, Sink, Source, Zip}
 import model.{TaxiRide, TaxiRideEvent}
 
@@ -36,7 +36,7 @@ object Graphs extends App {
 
       sourceTaxiRide ~> broadcast
 
-      val zip = builder.add(Zip[TaxiRideEvent, Long])
+      val zip: FanInShape2[TaxiRideEvent, Long, (TaxiRideEvent, Long)] = builder.add(Zip[TaxiRideEvent, Long])
 
       broadcast.out(0) ~> journalLog ~> zip.in0
       broadcast.out(1) ~> onlyRideId ~> zip.in1
@@ -47,7 +47,7 @@ object Graphs extends App {
     }
   )
 
-  //  sourceToSinkGraph.run()
+//  sourceToSinkGraph.run()
 
 
   val journalSink = Sink.foreach[(TaxiRideEvent)](println)
@@ -68,7 +68,7 @@ object Graphs extends App {
     }
   )
 
-  //  sourceToTwoSinkGraph.run()
+//  sourceToTwoSinkGraph.run()
 
 
   val input = Source(1 to 1000)
@@ -84,24 +84,26 @@ object Graphs extends App {
     GraphDSL.create() { implicit builder =>
       import GraphDSL.Implicits._
 
-      val merge = builder.add(Merge[Int](2))
+      val merge: UniformFanInShape[Int, Int] = builder.add(Merge[Int](2))
       val balance = builder.add(Balance[Int](2))
 
+/*
       fastSource ~> merge.in(0)
       slowSource ~> merge.in(1)
       merge.out ~> balance
       balance.out(0) ~> sink1
       balance.out(1) ~> sink2
+*/
 
-      //      fastSource ~> merge ~> balance ~> sink1
-      //      slowSource ~> merge
-      //      balance ~> sink2
+          fastSource ~> merge ~> balance ~> sink1
+          slowSource ~> merge
+          balance ~> sink2
 
       ClosedShape
     }
   )
 
-  //  balanceGraph.run()
+//  balanceGraph.run()
 
 
   val sourceTaxiRideInProgress = Source(
@@ -136,11 +138,11 @@ object Graphs extends App {
     }
   )
 
-  //  sourceGraph.to(Sink.foreach(println)).run()
+//  sourceGraph.to(Sink.foreach(println)).run()
 
 
-  val openSink1 = Sink.foreach[TaxiRide](x => println(s"In sink 1: $x"))
-  val openSink2 = Sink.foreach[TaxiRide](x => println(s"In sink 2: $x"))
+  val openSink1 = Sink.foreach[TaxiRide](x => println(s"In sink 1 Kafka: $x"))
+  val openSink2 = Sink.foreach[TaxiRide](x => println(s"In sink 2 Cassandra: $x"))
 
   val sinkGraph: Sink[TaxiRide, NotUsed] = Sink.fromGraph(
     GraphDSL.create() { implicit builder =>
